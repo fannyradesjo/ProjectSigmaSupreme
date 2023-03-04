@@ -2,66 +2,45 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Ballscript : MonoBehaviour
+public class BallScript : MonoBehaviour
 {
     Rigidbody rb;
-    [SerializeField] float movementSpeed = 6f;
+    [SerializeField] float startImpulseForce = 6f;
+    [SerializeField] float directionImpulseForce = 4f;
 
-    Vector3 forward;
+    Vector3 direction;
+    Vector3 car1Position;
+    Vector3 car2Position;
+    Vector3 egoPosition;
+    GameObject car1;
+    GameObject car2;
 
     // Start is called before the first frame update
     void Start()
     {
         rb = GetComponent<Rigidbody>();
+        car1 = GameObject.Find("Car 1");
+        car2 = GameObject.Find("Car 2");
+        direction = new Vector3(1f, 0f, 0f);
+        //rb.AddForce(startImpulseForce * direction, ForceMode.Impulse);
     }
 
     // Update is called once per frame
     void Update()
     {
-
+        car1Position = car1.transform.position;
+        car2Position = car2.transform.position;
+        egoPosition = rb.transform.position;
+        
+        if((car1Position - egoPosition).magnitude < (car2Position - egoPosition).magnitude)
+        {
+            direction = (car1Position - egoPosition).normalized;
+        }
+        else
+        {
+            direction = (car2Position - egoPosition).normalized;
+        }
+        rb.AddForce(directionImpulseForce * direction, ForceMode.Force);
     }
 
-    void MoveFunction()
-    {
-        forward = transform.right;
-
-        if (Input.GetKey(Forward))
-        {
-            rb.AddForce(movementSpeed * forward);
-        }
-        if (Input.GetKey(Backward))
-        {
-            rb.AddForce(-movementSpeed * forward);
-        }
-        if (Input.GetKey(Right))
-        {
-            transform.Rotate(new Vector3(0, 1, 0) * Time.deltaTime * rotationalSpeed);
-        }
-        if (Input.GetKey(Left))
-        {
-            transform.Rotate(new Vector3(0, -1, 0) * Time.deltaTime * rotationalSpeed);
-        }
-    }
-
-    bool IsGrounded()
-    {
-        Transform transWheel1 = transform.GetChild(0);
-        Transform transWheel2 = transform.GetChild(1);
-        Transform transWheel3 = transform.GetChild(2);
-        Transform transWheel4 = transform.GetChild(3);
-
-        return (Physics.Raycast(transWheel1.position, Vector3.down, groundBound) ||
-                Physics.Raycast(transWheel2.position, Vector3.down, groundBound) ||
-                Physics.Raycast(transWheel3.position, Vector3.down, groundBound) ||
-                Physics.Raycast(transWheel4.position, Vector3.down, groundBound));
-
-    }
-
-    void Jump()
-    {
-        if (Input.GetKeyDown(Up))
-        {
-            rb.AddForce(new Vector3(0, 1, 0) * jumpForce, ForceMode.Impulse);
-        }
-    }
 }
